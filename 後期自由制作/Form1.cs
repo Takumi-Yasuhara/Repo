@@ -13,10 +13,8 @@ namespace English_NumerOn
 {
     public partial class Form1 : Form
     {
-
         char[] TargetWords = new char[5];
         char[] GuessWords = new char[5];
-
         public Form1()
         {
             InitializeComponent();
@@ -82,13 +80,38 @@ namespace English_NumerOn
                 GuessWords[i] = guess[i];
             }
             int hit = 0, blow = 0;
+            // ターゲットの各文字の出現回数
+            Dictionary<char, int> targetCount = new Dictionary<char, int>();
             for (int i = 0; i < 5; i++)
             {
-                if (GuessWords[i] == TargetWords[i]) hit++;
-                else if (TargetWords.Contains(GuessWords[i])) blow++;
+                char t = TargetWords[i];
+                if (!targetCount.ContainsKey(t)) targetCount[t] = 0;
+                targetCount[t]++;
             }
+
+            bool[] isHit = new bool[5];
+            for (int i = 0; i < 5; i++)
+            {
+                if (GuessWords[i] == TargetWords[i])
+                {
+                    hit++;
+                    isHit[i] = true;
+                    targetCount[GuessWords[i]]--; // Hit で在庫消費
+                }
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (isHit[i]) continue; // Hit は除外
+                char g = GuessWords[i];
+                if (targetCount.TryGetValue(g, out int remaining) && remaining > 0)
+                {
+                    blow++;
+                    targetCount[g]--; // Blow でも在庫消費
+                }
+            }
+
             listBox1_writewordlist.Items.Add($"{guess.ToUpper()} → Hit: {hit}, Blow: {blow}");
-            //最新の入力履歴を表示
             listBox1_writewordlist.TopIndex = listBox1_writewordlist.Items.Count - 1;
             if (hit == textBox1_write.MaxLength)
             {
