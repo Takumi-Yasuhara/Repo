@@ -20,80 +20,89 @@ namespace English_NumerOn
         public Form1()
         {
             InitializeComponent();
-            textBox1.MaxLength = 5; // 入力制限
-            textBox2.MaxLength = 5; // 入力制限
-          
+            textBox1_write.MaxLength = 5; // 入力制限
+            textBox2_answer.MaxLength = 5; 
         }
+        /// <summary>
+        /// 起動時及びリセット時に処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
-
-
+            MessageBox.Show("本プログラムの無断転載、複製、改変等を禁止いたします");
             MessageBox.Show("好きな5文字の英単語を左下に入力してね");
             MessageBox.Show("右のボタンを押して確定してね");
-            labelMode.Text = "現在";
-           
-
-
+            label_CurrentModeView.Text = "モード: アルファベット";
+            button2_answer.Enabled = false;
+            button4_retire.Enabled = false;
         }
-
-
-
-
-        private void button1_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 単語確定ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Button1_Click(object sender, EventArgs e)
         {
-            string input = textBox1.Text.Trim().ToLower();
-            if (input.Length != textBox1.MaxLength)
+            string input = textBox1_write.Text.Trim().ToLower();
+            if (input.Length != textBox1_write.MaxLength)
             {
                 MessageBox.Show("5文字の英単語を入力してください");
-                
                 return;
             }
             for (int i = 0; i < 5; i++)
             {
                 TargetWords[i] = input[i];
             }
-            listBox1.Items.Clear();
-            textBox1.Clear();
-            textBox2.Clear();
-
-            //ResetTextBoxState(textBox1);
+            listBox1_writewordlist.Items.Clear();
+            textBox1_write.Clear();
+            textBox2_answer.Clear();
             MessageBox.Show("単語が入力されました！\r\n回答者に交代してね");
             MessageBox.Show("左上に英単語を入力してね！");
             MessageBox.Show("右のボタンで回答してね！");
+            button5_ModeChange.Enabled = false;
+            button2_answer.Enabled = true;
+            button4_retire.Enabled = true;
         }
+        /// <summary>
+        ///回答ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
-            string guess = textBox2.Text.Trim().ToLower();
-
-            if (guess.Length != textBox2.MaxLength)
+            string guess = textBox2_answer.Text.Trim().ToLower();
+            if (guess.Length != textBox2_answer.MaxLength)
             {
                 MessageBox.Show("5文字の英単語を入力してください");
-
                 return;
             }
-
             for (int i = 0; i < 5; i++)
             {
                 GuessWords[i] = guess[i];
             }
-
             int hit = 0, blow = 0;
             for (int i = 0; i < 5; i++)
             {
                 if (GuessWords[i] == TargetWords[i]) hit++;
                 else if (TargetWords.Contains(GuessWords[i])) blow++;
             }
-
-            listBox1.Items.Add($"{guess.ToUpper()} → Hit: {hit}, Blow: {blow}");
-            listBox1.TopIndex = listBox1.Items.Count - 1;
-
-            if (hit == textBox1.MaxLength)
+            listBox1_writewordlist.Items.Add($"{guess.ToUpper()} → Hit: {hit}, Blow: {blow}");
+            //最新の入力履歴を表示
+            listBox1_writewordlist.TopIndex = listBox1_writewordlist.Items.Count - 1;
+            if (hit == textBox1_write.MaxLength)
             {
                 MessageBox.Show("おみごと！クリアです！");
+                ResetGame();
+                return;
             }
-            textBox2.Clear();
+            textBox2_answer.Clear();
         }
-
+        /// <summary>
+        /// ランダムな英単語を問題に設定
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
             Random rand = new Random();
@@ -102,15 +111,18 @@ namespace English_NumerOn
             {
                 TargetWords[i] = selected[i];
             }
-            listBox1.Items.Clear();
-            textBox1.Clear();
-            //textBox2.Enabled = true;
-            //button2.Enabled = true;
-            MessageBox.Show($"ランダム単語が選ばれました！\r\n回答者に交代してね");
+            listBox1_writewordlist.Items.Clear();
+            textBox1_write.Clear();
+            MessageBox.Show("ランダム単語が選ばれました！\r\n回答者に交代してね");
             MessageBox.Show("左上に英単語を入力してね！");
             MessageBox.Show("右のボタンで回答してね！");
+            button5_ModeChange.Enabled = false;
+            button2_answer.Enabled = true;
+            button4_retire.Enabled = true;
         }
-
+        /// <summary>
+        /// ランダム単語リスト
+        /// </summary>
         List<string> _WordList = new List<string>
         {
               "apple", "grape", "lemon", "mango", "peach",
@@ -125,36 +137,61 @@ namespace English_NumerOn
               "board","booth","bound","brain","brand",
               //"","","","","", 
               //"","","","","", 
-              //"","","","","", --単語リスト追加用です
-
+              //"","","","","", //単語リスト追加用スペース
         };
-
+        /// <summary>
+        /// ギブアップボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
             string answer = new string(TargetWords);
-
-            // 答えを表示
             MessageBox.Show($"「{answer.ToUpper()}」\r\n知らないの？");
-            textBox1.Clear();
-            textBox2.Clear();
+            ResetGame();
         }
-        private void buttonModeChange_Click(object sender, EventArgs e)
+        /// <summary>
+        /// モード切替ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button5_Click(object sender, EventArgs e)
         {
-           
+            if (currentMode == InputMode.AlphabetOnly)
+            {
+                currentMode = InputMode.Any;
+                label_CurrentModeView.Text = "モード: 制限なし";
+                MessageBox.Show("制限なしモードに切り替えました");
+            }
+            else
+            {
+                currentMode = InputMode.AlphabetOnly;
+                label_CurrentModeView.Text = "モード: アルファベット";
+                MessageBox.Show("アルファベットのみモードに切り替えました");
+            }
         }
+        /// <summary>
+        /// コピペ禁止とエンターで文字確定
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.V)
             {
                 e.SuppressKeyPress = true; // Ctrl+V を無効化
             }
-
             if (e.KeyCode == Keys.Enter)
             {
-                button1.PerformClick();
+                button1_decision.PerformClick();
                 e.SuppressKeyPress = true;
             }
         }
+        /// <summary>
+        /// コピペ禁止とエンターで文字確定
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.V)
@@ -164,34 +201,121 @@ namespace English_NumerOn
 
             if (e.KeyCode == Keys.Enter)
             {
-                button2.PerformClick();
+                button2_answer.PerformClick();
                 e.SuppressKeyPress = true;
             }
         }
-
-
-
-
+        /// <summary>
+        /// モードと違う文字の削除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-           
+            if (currentMode == InputMode.AlphabetOnly)
+            {
+                if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar))
+                {
+                    e.Handled = true; // 入力を無効化
+                }
+            }
         }
-
-
+        /// <summary>
+        /// モードと違う文字の削除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
-          
+            if (currentMode == InputMode.AlphabetOnly)
+            {
+                if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar))
+                {
+                    e.Handled = true;
+                }
+            }
         }
-
-
-
-
+        /// <summary>
+        /// 文字入力時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            if (currentMode == InputMode.AlphabetOnly)
+            {
+                string original = textBox1_write.Text;
+                string filtered = new string(original
+                    .Where(c => char.IsLetter(c) && c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A')
+                    .ToArray());
+                if (original != filtered)
+                {
+                    int pos = textBox1_write.SelectionStart;
+                    textBox1_write.Text = filtered;
+                    // カーソル位置を維持
+                    textBox1_write.SelectionStart = Math.Min(pos, filtered.Length); 
+                }
+            }
         }
-
+        /// <summary>
+        /// 文字入力時処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            if (currentMode == InputMode.AlphabetOnly)
+            {
+                string original = textBox2_answer.Text;
+                string filtered = new string(original
+                    .Where(c => char.IsLetter(c) && c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A')
+                    .ToArray());
+                if (original != filtered)
+                {
+                    int pos = textBox2_answer.SelectionStart;
+                    textBox2_answer.Text = filtered;
+                    textBox2_answer.SelectionStart = Math.Min(pos, filtered.Length);
+                }
+            }
+        }
+
+        enum InputMode
+        {
+            AlphabetOnly,
+            Any
+        }
+        private InputMode currentMode = InputMode.AlphabetOnly;
+
+        /// <summary>
+        /// リセットボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button6_Click(object sender, EventArgs e)
+        {
+            ResetGame();
+        }
+        /// <summary>
+        /// 初期化
+        /// </summary>
+        private void ResetGame()
+        {
+            // 配列初期化
+            TargetWords = new char[5];
+            GuessWords = new char[5];
+            // 入力欄クリア
+            textBox1_write.Clear();
+            textBox2_answer.Clear();
+            // リストクリア
+            listBox1_writewordlist.Items.Clear();
+            // モードを初期状態に戻す
+            currentMode = InputMode.AlphabetOnly;
+            label_CurrentModeView.Text = "モード: アルファベット";
+            // モード切替ボタンを再度有効化
+            button5_ModeChange.Enabled = true;
+            button2_answer.Enabled = false;
+            button4_retire.Enabled = false;
+            MessageBox.Show("リセットしました！新しいゲームを始められます");
         }
     }
 }
