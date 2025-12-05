@@ -18,8 +18,8 @@ namespace English_NumerOn
         public Form1()
         {
             InitializeComponent();
-            textBox1_write.MaxLength = 5; // 入力制限
-            textBox2_answer.MaxLength = 5; 
+            textBox1_write.MaxLength = 5; 
+            textBox2_answer.MaxLength = 5;
         }
         /// <summary>
         /// 起動時及びリセット時に処理
@@ -31,9 +31,10 @@ namespace English_NumerOn
             MessageBox.Show("本プログラムの無断転載、複製、改変等を禁止いたします");
             MessageBox.Show("好きな5文字の英単語を左下に入力してね");
             MessageBox.Show("右のボタンを押して確定してね");
-            label_CurrentModeView.Text = "モード: アルファベット";
+            label_CurrentModeView.Text = "モード: アルファベット,５字";
             button2_answer.Enabled = false;
             button4_retire.Enabled = false;
+            textBox2_answer.Enabled=false;
         }
         /// <summary>
         /// 単語確定ボタン
@@ -61,6 +62,9 @@ namespace English_NumerOn
             button5_ModeChange.Enabled = false;
             button2_answer.Enabled = true;
             button4_retire.Enabled = true;
+            textBox1_write.Enabled = false;
+            textBox2_answer.Enabled = true;
+
         }
         /// <summary>
         ///回答ボタン
@@ -96,18 +100,18 @@ namespace English_NumerOn
                 {
                     hit++;
                     isHit[i] = true;
-                    targetCount[GuessWords[i]]--; // Hit で在庫消費
+                    targetCount[GuessWords[i]]--; 
                 }
             }
 
             for (int i = 0; i < 5; i++)
             {
-                if (isHit[i]) continue; // Hit は除外
+                if (isHit[i]) continue; 
                 char g = GuessWords[i];
                 if (targetCount.TryGetValue(g, out int remaining) && remaining > 0)
                 {
                     blow++;
-                    targetCount[g]--; // Blow でも在庫消費
+                    targetCount[g]--; 
                 }
             }
 
@@ -142,6 +146,9 @@ namespace English_NumerOn
             button5_ModeChange.Enabled = false;
             button2_answer.Enabled = true;
             button4_retire.Enabled = true;
+            textBox1_write.Enabled = false;
+            textBox2_answer.Enabled = true;
+
         }
         /// <summary>
         /// ランダム単語リスト
@@ -173,6 +180,13 @@ namespace English_NumerOn
             MessageBox.Show($"「{answer.ToUpper()}」\r\n知らないの？");
             ResetGame();
         }
+
+        enum InputMode
+        {
+            AlphabetOnly,
+            Any
+        }
+        private InputMode currentMode = InputMode.AlphabetOnly;
         /// <summary>
         /// モード切替ボタン
         /// </summary>
@@ -183,7 +197,7 @@ namespace English_NumerOn
             if (currentMode == InputMode.AlphabetOnly)
             {
                 currentMode = InputMode.Any;
-                label_CurrentModeView.Text = "モード: 制限なし";
+                label_CurrentModeView.Text = "モード: 制限なし,５字";
                 MessageBox.Show("制限なしモードに切り替えました");
             }
             else
@@ -202,7 +216,7 @@ namespace English_NumerOn
         {
             if (e.Control && e.KeyCode == Keys.V)
             {
-                e.SuppressKeyPress = true; // Ctrl+V を無効化
+                e.SuppressKeyPress = true; 
             }
             if (e.KeyCode == Keys.Enter)
             {
@@ -239,7 +253,7 @@ namespace English_NumerOn
             {
                 if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar))
                 {
-                    e.Handled = true; // 入力を無効化
+                    e.Handled = true; 
                 }
             }
         }
@@ -276,7 +290,7 @@ namespace English_NumerOn
                     int pos = textBox1_write.SelectionStart;
                     textBox1_write.Text = filtered;
                     // カーソル位置を維持
-                    textBox1_write.SelectionStart = Math.Min(pos, filtered.Length); 
+                    textBox1_write.SelectionStart = Math.Min(pos, filtered.Length);
                 }
             }
         }
@@ -302,12 +316,7 @@ namespace English_NumerOn
             }
         }
 
-        enum InputMode
-        {
-            AlphabetOnly,
-            Any
-        }
-        private InputMode currentMode = InputMode.AlphabetOnly;
+       
 
         /// <summary>
         /// リセットボタン
@@ -326,10 +335,8 @@ namespace English_NumerOn
             // 配列初期化
             TargetWords = new char[5];
             GuessWords = new char[5];
-            // 入力欄クリア
             textBox1_write.Clear();
             textBox2_answer.Clear();
-            // リストクリア
             listBox1_writewordlist.Items.Clear();
             // モードを初期状態に戻す
             currentMode = InputMode.AlphabetOnly;
@@ -338,7 +345,13 @@ namespace English_NumerOn
             button5_ModeChange.Enabled = true;
             button2_answer.Enabled = false;
             button4_retire.Enabled = false;
+            textBox1_write.Enabled = true;
+            textBox2_answer.Enabled=false;
+
             MessageBox.Show("リセットしました！新しいゲームを始められます");
         }
+        //６文字モード、ヒントボタン、追加するかも
+        //ランダムモードで、ジャンルわけ
+        //テキストファイルからランダム単語リストとして選択できるようにしたい。
     }
 }
